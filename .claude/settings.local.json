@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(node --version)",
+      "PowerShell(Stop-Process *)",
+      "PowerShell(Test-NetConnection *)",
+      "PowerShell(nslookup *)"
+    ]
+  }
+}
