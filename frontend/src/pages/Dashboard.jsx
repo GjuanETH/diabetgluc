@@ -4,16 +4,19 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine,
 } from 'recharts';
-import { ClipboardList, Bell, Apple, User, AlertTriangle, TrendingUp, Activity, Droplets } from 'lucide-react';
+import {
+  ClipboardList, Bell, Apple, User, AlertTriangle,
+  TrendingUp, Activity, Droplets, Hash, ChevronRight,
+} from 'lucide-react';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { Skeleton, SkeletonCard } from '../components/Skeleton';
 
 const QUICK = [
-  { label: 'Historial',     to: '/historial',     cls: 'green',  Icon: ClipboardList },
-  { label: 'Recordatorios', to: '/recordatorios', cls: 'purple', Icon: Bell },
-  { label: 'Nutrición',     to: '/nutricion',     cls: 'orange', Icon: Apple },
-  { label: 'Perfil',        to: '/perfil',        cls: 'pink',   Icon: User },
+  { label: 'Historial',     desc: 'Ver todos los registros', to: '/historial',     cls: 'green',  Icon: ClipboardList },
+  { label: 'Recordatorios', desc: 'Alertas de medicación',   to: '/recordatorios', cls: 'purple', Icon: Bell },
+  { label: 'Nutrición',     desc: 'Guía de alimentos',        to: '/nutricion',     cls: 'orange', Icon: Apple },
+  { label: 'Perfil',        desc: 'Configurar rangos',        to: '/perfil',        cls: 'pink',   Icon: User },
 ];
 
 const PERIODS = [
@@ -31,14 +34,14 @@ const fmtTooltipLabel = (d) =>
   new Date(d).toLocaleString('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'America/Bogota' });
 
 export default function Dashboard() {
-  const { user } = useAuth();
-  const navigate  = useNavigate();
-  const location  = useLocation();
-  const [stats, setStats]   = useState(null);
+  const { user }    = useAuth();
+  const navigate    = useNavigate();
+  const location    = useLocation();
+  const [stats, setStats]     = useState(null);
   const [loading, setLoading] = useState(true);
-  const [dias, setDias]     = useState(7);
+  const [dias, setDias]       = useState(7);
 
-  const fetchStats = useCallback(async (d = dias) => {
+  const fetchStats = useCallback(async (d = 7) => {
     setLoading(true);
     try {
       const { data } = await api.get(`/glucose/stats?dias=${d}`);
@@ -50,23 +53,32 @@ export default function Dashboard() {
 
   useEffect(() => { fetchStats(dias); }, [fetchStats, location.key]);
 
-  const handlePeriod = (d) => {
-    setDias(d);
-    fetchStats(d);
-  };
+  const handlePeriod = (d) => { setDias(d); fetchStats(d); };
 
-  const ultima    = stats?.ultimaMedicion;
+  const ultima     = stats?.ultimaMedicion;
   const alertaBaja = ultima?.estado === 'Bajo';
   const alertaAlta = ultima?.estado === 'Alto';
   const tir        = stats?.tir;
 
+  const hba1cColor = !stats?.hba1c ? 'var(--text-muted)'
+    : Number(stats.hba1c) < 7 ? 'var(--green)'
+    : Number(stats.hba1c) < 8 ? 'var(--amber)'
+    : 'var(--red)';
+
+  const hba1cLabel = !stats?.hba1c ? null
+    : Number(stats.hba1c) < 7 ? 'En objetivo'
+    : Number(stats.hba1c) < 8 ? 'Ligeramente elevada'
+    : 'Elevada — consulta tu médico';
+
   return (
     <div>
+      {/* ── Header ── */}
       <div className="page-header">
         <h2>Dashboard</h2>
-        <p>Bienvenido, {user?.nombre}</p>
+        <p>Bienvenido de vuelta, <strong>{user?.nombre?.split(' ')[0]}</strong></p>
       </div>
 
+      {/* ── Alertas ── */}
       {alertaBaja && (
         <div className="alert-banner danger">
           <AlertTriangle size={18} />
@@ -76,11 +88,11 @@ export default function Dashboard() {
       {alertaAlta && (
         <div className="alert-banner warning">
           <AlertTriangle size={18} />
-          Alerta: última medición en nivel ALTO ({ultima.valor} mg/dL) — revisar con tu médico.
+          Alerta: última medición en nivel ALTO ({ultima.valor} mg/dL) — consulta con tu médico.
         </div>
       )}
 
-      {/* ── Tarjetas de stats ── */}
+      {/* ── Stat cards ── */}
       <div className="stats-grid">
         {loading ? (
           <>
@@ -90,34 +102,45 @@ export default function Dashboard() {
           </>
         ) : (
           <>
-            <div className="stat-card">
+            {/* Última medición */}
+            <div className="stat-card accent-blue">
+              <div className="stat-icon-wrap stat-icon-blue">
+                <Droplets size={18} />
+              </div>
               <div className="stat-label">Última medición</div>
               <div className="stat-value">
                 {ultima ? ultima.valor : '—'}
                 {ultima && <span className="stat-unit">mg/dL</span>}
               </div>
               {ultima && (
-                <span className={`badge badge-${ultima.estado.toLowerCase()}`} style={{ marginTop: 8 }}>
+                <span className={`badge badge-${ultima.estado.toLowerCase()}`} style={{ marginTop: 10, display: 'inline-flex' }}>
                   {ultima.estado}
                 </span>
               )}
+              {!ultima && <div className="stat-sub">Sin registros aún</div>}
             </div>
 
-            <div className="stat-card dark">
+            {/* Promedio semanal */}
+            <div className="stat-card accent-green">
+              <div className="stat-icon-wrap stat-icon-green">
+                <TrendingUp size={18} />
+              </div>
               <div className="stat-label">Promedio semanal</div>
               <div className="stat-value">
                 {stats?.promedioSemanal != null ? stats.promedioSemanal : '—'}
-                {stats?.promedioSemanal != null && (
-                  <span className="stat-unit" style={{ color: '#94a3b8' }}>mg/dL</span>
-                )}
+                {stats?.promedioSemanal != null && <span className="stat-unit">mg/dL</span>}
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: 6 }}>Últimos 7 días</div>
+              <div className="stat-sub">Últimos 7 días</div>
             </div>
 
-            <div className="stat-card">
+            {/* Registros totales */}
+            <div className="stat-card accent-purple">
+              <div className="stat-icon-wrap stat-icon-purple">
+                <Hash size={18} />
+              </div>
               <div className="stat-label">Registros totales</div>
               <div className="stat-value">{stats?.total ?? 0}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 6 }}>en tu historial</div>
+              <div className="stat-sub">en tu historial</div>
             </div>
           </>
         )}
@@ -127,46 +150,56 @@ export default function Dashboard() {
       <div className="tir-row">
         {/* HbA1c */}
         <div className="card">
-          <div className="flex items-center gap-2 mb-4" style={{ marginBottom: 12 }}>
-            <Activity size={16} color="var(--primary)" />
-            <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>HbA1c Estimada</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+            <div className="stat-icon-wrap stat-icon-purple" style={{ width: 32, height: 32, borderRadius: 8, marginBottom: 0 }}>
+              <Activity size={15} />
+            </div>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>HbA1c Estimada</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Basada en 90 días</div>
+            </div>
           </div>
+
           {loading ? (
             <>
-              <Skeleton height={40} width="60%" style={{ marginBottom: 8 }} />
-              <Skeleton height={12} width="80%" />
+              <Skeleton height={44} width="55%" style={{ marginBottom: 8 }} />
+              <Skeleton height={12} width="75%" />
             </>
           ) : stats?.hba1c ? (
             <>
-              <div className="stat-value" style={{ fontSize: '2.2rem', marginBottom: 4 }}>
-                {stats.hba1c}<span className="stat-unit">%</span>
+              <div style={{ fontSize: '2.4rem', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1, marginBottom: 8 }}>
+                {stats.hba1c}<span style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--text-muted)' }}>%</span>
               </div>
-              <div className="text-muted">Calculada con {Math.min(stats.total, 90)} lecturas (90 días)</div>
-              <div style={{ marginTop: 8, fontSize: '0.78rem', color: stats.hba1c < 7 ? 'var(--green)' : stats.hba1c < 8 ? 'var(--amber)' : 'var(--red)', fontWeight: 600 }}>
-                {stats.hba1c < 7 ? 'En objetivo' : stats.hba1c < 8 ? 'Ligeramente elevada' : 'Elevada — consulta tu médico'}
-              </div>
+              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: hba1cColor, background: `${hba1cColor}18`, padding: '3px 10px', borderRadius: 999 }}>
+                {hba1cLabel}
+              </span>
             </>
           ) : (
-            <div className="text-muted" style={{ padding: '8px 0' }}>
-              <Droplets size={24} style={{ marginBottom: 8, opacity: 0.4 }} />
-              <p>Necesitas al menos 7 lecturas en los últimos 90 días para estimar la HbA1c.</p>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.84rem', lineHeight: 1.5 }}>
+              <Droplets size={20} style={{ marginBottom: 8, opacity: 0.35 }} />
+              <p>Necesitas al menos 7 lecturas en 90 días para estimar la HbA1c.</p>
             </div>
           )}
         </div>
 
         {/* TIR */}
         <div className="card">
-          <div className="flex items-center gap-2" style={{ marginBottom: 12 }}>
-            <Activity size={16} color="var(--green)" />
-            <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Tiempo en Rango (TIR)</span>
-            <span className="text-muted" style={{ fontSize: '0.72rem', marginLeft: 4 }}>— últimos 30 días</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+            <div className="stat-icon-wrap stat-icon-green" style={{ width: 32, height: 32, borderRadius: 8, marginBottom: 0 }}>
+              <Activity size={15} />
+            </div>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>Tiempo en Rango</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Últimos 30 días</div>
+            </div>
           </div>
+
           {loading ? (
             <>
-              <Skeleton height={10} style={{ marginBottom: 12, borderRadius: 999 }} />
-              <Skeleton height={12} width="70%" style={{ marginBottom: 6 }} />
-              <Skeleton height={12} width="55%" style={{ marginBottom: 6 }} />
-              <Skeleton height={12} width="50%" />
+              <Skeleton height={8} style={{ marginBottom: 14, borderRadius: 999 }} />
+              <Skeleton height={12} width="65%" style={{ marginBottom: 7 }} />
+              <Skeleton height={12} width="50%" style={{ marginBottom: 7 }} />
+              <Skeleton height={12} width="45%" />
             </>
           ) : tir ? (
             <>
@@ -176,24 +209,34 @@ export default function Dashboard() {
                 <div className="tir-bar-alto"   style={{ width: `${tir.alto}%` }} />
               </div>
               <div className="tir-legend">
-                <span className="tir-label"><span className="tir-dot normal" />Normal: <strong style={{ marginLeft: 4 }}>{tir.normal}%</strong></span>
-                <span className="tir-label"><span className="tir-dot bajo"   />Bajo: <strong style={{ marginLeft: 4 }}>{tir.bajo}%</strong></span>
-                <span className="tir-label"><span className="tir-dot alto"   />Alto: <strong style={{ marginLeft: 4 }}>{tir.alto}%</strong></span>
+                <span className="tir-label"><span className="tir-dot normal" />Normal <strong style={{ marginLeft: 4 }}>{tir.normal}%</strong></span>
+                <span className="tir-label"><span className="tir-dot bajo"   />Bajo <strong style={{ marginLeft: 4 }}>{tir.bajo}%</strong></span>
+                <span className="tir-label"><span className="tir-dot alto"   />Alto <strong style={{ marginLeft: 4 }}>{tir.alto}%</strong></span>
               </div>
-              <div className="text-muted" style={{ marginTop: 8, fontSize: '0.75rem' }}>Basado en {tir.total} lecturas</div>
+              <div style={{ marginTop: 10, fontSize: '0.72rem', color: 'var(--text-faint)' }}>
+                {tir.total} lecturas analizadas
+              </div>
             </>
           ) : (
-            <div className="text-muted">No hay suficientes datos para calcular el TIR.</div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.84rem' }}>
+              No hay suficientes datos (últimos 30 días).
+            </div>
           )}
         </div>
       </div>
 
       {/* ── Gráfica ── */}
-      <div className="card mb-4" style={{ marginBottom: 24 }}>
-        <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
-          <h3 style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <TrendingUp size={16} />Evolución de glucosa
-          </h3>
+      <div className="card" style={{ marginBottom: 24 }}>
+        <div className="flex items-center justify-between" style={{ marginBottom: 18 }}>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 7 }}>
+              <TrendingUp size={16} color="var(--primary)" />
+              Evolución de glucosa
+            </div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 2 }}>
+              Valores en mg/dL con líneas de rango objetivo
+            </div>
+          </div>
           <div className="period-toggle">
             {PERIODS.map(p => (
               <button
@@ -208,7 +251,7 @@ export default function Dashboard() {
         </div>
 
         {loading ? (
-          <Skeleton height={240} radius={8} />
+          <Skeleton height={250} radius={10} />
         ) : !stats?.grafica?.length ? (
           <div className="empty-state">
             <p>No hay registros en este período</p>
@@ -219,40 +262,37 @@ export default function Dashboard() {
         ) : (
           <div className="chart-container">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={stats.grafica} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <LineChart data={stats.grafica} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="fecha" tickFormatter={fmtAxis} tick={{ fontSize: 11, fill: 'var(--text-muted)' }} />
-                <YAxis domain={['auto', 'auto']} tick={{ fontSize: 11, fill: 'var(--text-muted)' }} unit=" mg/dL" width={85} />
+                <XAxis dataKey="fecha" tickFormatter={fmtAxis} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} />
+                <YAxis domain={['auto', 'auto']} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} unit=" mg" width={70} />
                 <Tooltip
                   formatter={(v) => [`${v} mg/dL`, 'Glucosa']}
                   labelFormatter={fmtTooltipLabel}
-                  contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)' }}
+                  contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text)', fontSize: 13, boxShadow: 'var(--shadow-md)' }}
                 />
-                <ReferenceLine
-                  y={user?.rangoObjetivoMin ?? 70}
-                  stroke="#dc2626" strokeDasharray="4 2"
-                  label={{ value: 'Mín', fontSize: 11, fill: '#dc2626' }}
-                />
-                <ReferenceLine
-                  y={user?.rangoObjetivoMax ?? 180}
-                  stroke="#d97706" strokeDasharray="4 2"
-                  label={{ value: 'Máx', fontSize: 11, fill: '#d97706' }}
-                />
-                <Line
-                  type="monotone" dataKey="valor" stroke="#2563eb" strokeWidth={2}
-                  dot={{ r: 4, fill: '#2563eb' }} activeDot={{ r: 6 }}
-                />
+                <ReferenceLine y={user?.rangoObjetivoMin ?? 70} stroke="#dc2626" strokeDasharray="4 2" label={{ value: 'Mín', fontSize: 10, fill: '#dc2626', position: 'insideTopRight' }} />
+                <ReferenceLine y={user?.rangoObjetivoMax ?? 180} stroke="#d97706" strokeDasharray="4 2" label={{ value: 'Máx', fontSize: 10, fill: '#d97706', position: 'insideTopRight' }} />
+                <Line type="monotone" dataKey="valor" stroke="var(--primary)" strokeWidth={2.5} dot={{ r: 4, fill: 'var(--primary)', strokeWidth: 2, stroke: 'var(--card-bg)' }} activeDot={{ r: 6, stroke: 'var(--primary)', strokeWidth: 2, fill: 'var(--card-bg)' }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         )}
       </div>
 
+      {/* ── Quick cards ── */}
+      <div className="section-title">Accesos rápidos</div>
       <div className="quick-grid">
-        {QUICK.map(({ label, to, cls, Icon }) => (
+        {QUICK.map(({ label, desc, to, cls, Icon }) => (
           <button key={to} className={`quick-card ${cls}`} onClick={() => navigate(to)}>
-            <Icon size={28} />
-            <span className="quick-card-title">{label}</span>
+            <div className="quick-card-icon">
+              <Icon size={20} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div className="quick-card-title">{label}</div>
+              <div style={{ fontSize: '0.72rem', opacity: 0.7, marginTop: 2 }}>{desc}</div>
+            </div>
+            <ChevronRight size={16} style={{ opacity: 0.6 }} />
           </button>
         ))}
       </div>

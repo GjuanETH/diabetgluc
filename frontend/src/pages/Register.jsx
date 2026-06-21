@@ -1,14 +1,20 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Droplets } from 'lucide-react';
+import { Droplets, ShieldCheck, BarChart2, Smartphone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+
+const FEATURES = [
+  { icon: <ShieldCheck size={16} color="#60a5fa" />, title: 'Datos 100% privados', desc: 'Cifrado bcrypt. Solo tú accedes a tu información.' },
+  { icon: <BarChart2 size={16} color="#a78bfa" />, title: 'Análisis clínicos', desc: 'TIR, HbA1c estimada y exportación a PDF.' },
+  { icon: <Smartphone size={16} color="#34d399" />, title: 'Instalable como app', desc: 'Accede desde cualquier dispositivo sin instalar nada.' },
+];
 
 export default function Register() {
   const [form, setForm] = useState({ nombre: '', email: '', password: '', tipoDiabetes: 'Tipo 2' });
-  const [error, setError] = useState('');
+  const [error, setError]   = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
-  const navigate = useNavigate();
+  const navigate     = useNavigate();
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -32,43 +38,95 @@ export default function Register() {
 
   return (
     <div className="auth-page">
-      <div className="auth-card">
-        <div className="auth-logo">
-          <Droplets size={36} color="#2563eb" style={{ marginBottom: 8 }} />
-          <h1>Diabet Gluc</h1>
-          <p>Crear nueva cuenta</p>
+      {/* ── Panel izquierdo (branding) ── */}
+      <div className="auth-panel-left">
+        <div className="auth-brand">
+          <div className="auth-brand-logo">
+            <div className="auth-brand-icon">
+              <Droplets size={22} color="#fff" />
+            </div>
+            <span className="auth-brand-name">Diabet Gluc</span>
+          </div>
+
+          <h1 className="auth-headline">
+            Controla tu salud<br />con <span>inteligencia</span>
+          </h1>
+          <p className="auth-subline">
+            Únete a quienes ya llevan un control profesional de su glucosa. Crea tu cuenta gratuita en segundos.
+          </p>
+
+          <div className="auth-features">
+            {FEATURES.map((f, i) => (
+              <div className="auth-feature" key={i}>
+                <div className="auth-feature-icon">{f.icon}</div>
+                <div className="auth-feature-text">
+                  <h4>{f.title}</h4>
+                  <p>{f.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
+      </div>
 
-        {error && <div className="auth-error">{error}</div>}
+      {/* ── Panel derecho (formulario) ── */}
+      <div className="auth-panel-right">
+        <div className="auth-form-box">
+          <div className="auth-form-header">
+            <h2>Crear cuenta</h2>
+            <p>Comienza a controlar tu glucosa hoy</p>
+          </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">Nombre completo</label>
-            <input className="form-input" type="text" name="nombre" value={form.nombre} onChange={handleChange} placeholder="Tu nombre" required />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Email</label>
-            <input className="form-input" type="email" name="email" value={form.email} onChange={handleChange} placeholder="tu@email.com" required />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Contraseña (mín. 8 caracteres)</label>
-            <input className="form-input" type="password" name="password" value={form.password} onChange={handleChange} placeholder="••••••••" required />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Tipo de diabetes</label>
-            <select className="form-input" name="tipoDiabetes" value={form.tipoDiabetes} onChange={handleChange}>
-              <option>Tipo 1</option>
-              <option>Tipo 2</option>
-              <option>Otro</option>
-            </select>
-          </div>
-          <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '10px' }} type="submit" disabled={loading}>
-            {loading ? 'Creando cuenta...' : 'Crear cuenta'}
-          </button>
-        </form>
+          {error && <div className="auth-error">{error}</div>}
 
-        <div className="auth-link">
-          ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label">Nombre completo</label>
+              <input
+                className="form-input"
+                type="text" name="nombre"
+                value={form.nombre} onChange={handleChange}
+                placeholder="Ej: María García"
+                autoComplete="name" required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Correo electrónico</label>
+              <input
+                className="form-input"
+                type="email" name="email"
+                value={form.email} onChange={handleChange}
+                placeholder="tu@correo.com"
+                autoComplete="email" required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Contraseña <span style={{ color: 'var(--text-faint)', fontWeight: 400 }}>(mín. 8 caracteres)</span></label>
+              <input
+                className="form-input"
+                type="password" name="password"
+                value={form.password} onChange={handleChange}
+                placeholder="••••••••"
+                autoComplete="new-password" required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Tipo de diabetes</label>
+              <select className="form-input" name="tipoDiabetes" value={form.tipoDiabetes} onChange={handleChange}>
+                <option>Tipo 1</option>
+                <option>Tipo 2</option>
+                <option>Otro</option>
+              </select>
+            </div>
+
+            <button className="auth-submit" type="submit" disabled={loading}>
+              {loading ? 'Creando cuenta...' : 'Crear cuenta gratis'}
+            </button>
+          </form>
+
+          <div className="auth-link">
+            ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
+          </div>
         </div>
       </div>
     </div>
