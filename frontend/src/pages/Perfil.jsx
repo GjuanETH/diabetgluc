@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Save, User } from 'lucide-react';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 export default function Perfil() {
   const { user, refreshUser } = useAuth();
+  const { addToast } = useToast();
   const [form, setForm] = useState({
     nombre: user?.nombre || '',
     email: user?.email || '',
@@ -13,14 +15,13 @@ export default function Perfil() {
     rangoObjetivoMax: user?.rangoObjetivoMax ?? 180,
   });
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [saving, setSaving] = useState(false);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); setSuccess('');
+    setError('');
     if (Number(form.rangoObjetivoMin) >= Number(form.rangoObjetivoMax)) {
       setError('El rango mínimo debe ser menor que el máximo');
       return;
@@ -33,7 +34,7 @@ export default function Perfil() {
         rangoObjetivoMax: Number(form.rangoObjetivoMax),
       });
       await refreshUser();
-      setSuccess('Perfil actualizado correctamente');
+      addToast('Perfil actualizado correctamente', 'success');
     } catch (err) {
       setError(err.response?.data?.message || 'Error al actualizar perfil');
     } finally { setSaving(false); }
@@ -71,11 +72,6 @@ export default function Perfil() {
           </h3>
 
           {error && <div className="auth-error">{error}</div>}
-          {success && (
-            <div style={{ background:'var(--green-bg)', color:'var(--green)', padding:'10px 14px', borderRadius:'var(--radius-sm)', fontSize:'0.875rem', marginBottom:16 }}>
-              {success}
-            </div>
-          )}
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">

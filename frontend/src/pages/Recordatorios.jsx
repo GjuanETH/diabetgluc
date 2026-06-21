@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Plus, Trash2, X, Bell } from 'lucide-react';
 import api from '../api/axios';
+import { useToast } from '../context/ToastContext';
 
 const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const TIPOS = ['Medicamento', 'Medición', 'Otro'];
 const EMPTY_FORM = { tipo: 'Medicamento', hora: '08:00', dias: [] };
 
 export default function Recordatorios() {
+  const { addToast } = useToast();
   const [reminders, setReminders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
@@ -40,6 +42,7 @@ export default function Recordatorios() {
       await load();
       setModal(false);
       setForm(EMPTY_FORM);
+      addToast('Recordatorio creado correctamente', 'success');
     } catch (err) {
       setError(err.response?.data?.message || 'Error al guardar');
     } finally { setSaving(false); }
@@ -51,7 +54,12 @@ export default function Recordatorios() {
   };
 
   const handleDelete = async (id) => {
-    await api.delete(`/reminders/${id}`);
+    try {
+      await api.delete(`/reminders/${id}`);
+      addToast('Recordatorio eliminado', 'success');
+    } catch {
+      addToast('Error al eliminar recordatorio', 'error');
+    }
     setDeleteId(null);
     await load();
   };

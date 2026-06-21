@@ -4,7 +4,7 @@
 | Campo | Detalle |
 |-------|---------|
 | Proyecto | Diabet Gluc — Control de Glucosa |
-| Versión | 1.0 |
+| Versión | 2.0 |
 | Fecha | Junio 2026 |
 
 ---
@@ -19,6 +19,7 @@
 | EP-04 | Recordatorios y alertas |
 | EP-05 | Nutrición y educación |
 | EP-06 | Configuración de perfil |
+| EP-07 | Experiencia de usuario avanzada |
 
 ---
 
@@ -326,6 +327,118 @@
 
 ---
 
+---
+
+## EP-07 — Experiencia de usuario avanzada
+
+### HU-20 — Ver Tiempo en Rango (TIR)
+**Como** usuario autenticado,  
+**quiero** ver qué porcentaje del tiempo mis mediciones estuvieron en rango normal, bajo y alto durante el último mes,  
+**para** entender mejor el control global de mi glucosa.
+
+**Criterios de aceptación:**
+- El Dashboard muestra una tarjeta de TIR con una barra de colores proporcional al porcentaje de cada estado.
+- Se indica el porcentaje numérico de Normal, Bajo y Alto.
+- Se muestra la cantidad total de lecturas usadas para el cálculo.
+- Si no hay lecturas en los últimos 30 días, se muestra un mensaje informativo.
+
+**Prioridad:** Media  
+**Estimación:** 2 puntos
+
+---
+
+### HU-21 — Ver HbA1c estimada
+**Como** usuario autenticado,  
+**quiero** ver una estimación de mi hemoglobina glicosilada (HbA1c),  
+**para** tener una referencia del control de glucosa a largo plazo sin necesitar un análisis de laboratorio.
+
+**Criterios de aceptación:**
+- El Dashboard muestra la HbA1c estimada con un decimal (ej. 6.8%).
+- Se indica una interpretación: "En objetivo" (<7%), "Ligeramente elevada" (7–8%) o "Elevada" (>8%).
+- Se necesitan al menos 7 lecturas en los últimos 90 días; de lo contrario, se muestra un mensaje indicando los datos insuficientes.
+
+**Prioridad:** Media  
+**Estimación:** 2 puntos
+
+---
+
+### HU-22 — Cambiar período de la gráfica
+**Como** usuario autenticado,  
+**quiero** poder ver la gráfica de glucosa para diferentes períodos (7, 14 o 30 días),  
+**para** analizar tendencias a corto y mediano plazo.
+
+**Criterios de aceptación:**
+- La gráfica tiene botones de selección de período: 7 días, 14 días, 30 días.
+- Al cambiar el período, la gráfica se actualiza inmediatamente con los datos del nuevo intervalo.
+- El período seleccionado se resalta visualmente.
+
+**Prioridad:** Media  
+**Estimación:** 1 punto
+
+---
+
+### HU-23 — Filtrar historial por estado y fecha
+**Como** usuario autenticado,  
+**quiero** poder filtrar mi historial de glucosa por estado (Normal/Bajo/Alto) y por rango de fechas,  
+**para** analizar registros específicos sin tener que revisar todo el historial.
+
+**Criterios de aceptación:**
+- Un panel de filtros permite seleccionar estado, fecha desde y fecha hasta.
+- Los filtros son opcionales y combinables entre sí.
+- El número de registros mostrados refleja los resultados filtrados.
+- Existe un botón para limpiar todos los filtros y volver a la vista completa.
+
+**Prioridad:** Media  
+**Estimación:** 3 puntos
+
+---
+
+### HU-24 — Exportar historial a PDF
+**Como** usuario autenticado,  
+**quiero** poder descargar mi historial de glucosa como un archivo PDF,  
+**para** compartirlo con mi médico o guardarlo como respaldo.
+
+**Criterios de aceptación:**
+- Hay un botón "PDF" en la página del historial.
+- El PDF generado incluye nombre del paciente, rango objetivo, fecha de exportación y tabla completa de registros.
+- Si hay filtros activos, el PDF solo incluye los registros filtrados.
+- El archivo se descarga automáticamente con nombre `historial-glucosa-FECHA.pdf`.
+
+**Prioridad:** Media  
+**Estimación:** 3 puntos
+
+---
+
+### HU-25 — Activar modo oscuro
+**Como** usuario autenticado,  
+**quiero** poder cambiar la interfaz a un tema oscuro,  
+**para** usar la aplicación cómodamente en condiciones de poca luz sin fatigar la vista.
+
+**Criterios de aceptación:**
+- Un botón en el menú lateral permite cambiar entre modo claro y oscuro.
+- Todos los elementos de la interfaz adaptan sus colores al tema activo.
+- La preferencia de tema se guarda y se aplica automáticamente en la próxima visita.
+
+**Prioridad:** Baja  
+**Estimación:** 2 puntos
+
+---
+
+### HU-26 — Instalar la app en el dispositivo (PWA)
+**Como** usuario autenticado,  
+**quiero** poder instalar Diabet Gluc en mi celular como si fuera una app nativa,  
+**para** acceder a ella rápidamente desde la pantalla de inicio.
+
+**Criterios de aceptación:**
+- El navegador muestra la opción de instalar la aplicación (banner o menú "Agregar a pantalla de inicio").
+- La aplicación instalada se abre en modo standalone, sin barra de URL del navegador.
+- El ícono de la app y el nombre "DiabetGluc" aparecen correctamente en la pantalla de inicio.
+
+**Prioridad:** Baja  
+**Estimación:** 2 puntos
+
+---
+
 ## Resumen de historias
 
 | ID | Historia | Épica | Prioridad | Puntos |
@@ -349,4 +462,11 @@
 | HU-17 | Consejos prácticos | EP-05 | Baja | 1 |
 | HU-18 | Editar perfil | EP-06 | Media | 2 |
 | HU-19 | Configurar rangos objetivo | EP-06 | Alta | 3 |
-| | **TOTAL** | | | **39 puntos** |
+| HU-20 | Ver Tiempo en Rango (TIR) | EP-07 | Media | 2 |
+| HU-21 | Ver HbA1c estimada | EP-07 | Media | 2 |
+| HU-22 | Cambiar período de la gráfica | EP-07 | Media | 1 |
+| HU-23 | Filtrar historial por estado y fecha | EP-07 | Media | 3 |
+| HU-24 | Exportar historial a PDF | EP-07 | Media | 3 |
+| HU-25 | Activar modo oscuro | EP-07 | Baja | 2 |
+| HU-26 | Instalar la app (PWA) | EP-07 | Baja | 2 |
+| | **TOTAL** | | | **54 puntos** |

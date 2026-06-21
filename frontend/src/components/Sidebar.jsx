@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, ClipboardList, Bell, Apple, User, LogOut, Droplets, X } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Bell, Apple, User, LogOut, Droplets, X, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const navItems = [
   { to: '/dashboard',     label: 'Dashboard',     icon: LayoutDashboard },
@@ -11,14 +12,12 @@ const navItems = [
 ];
 
 export default function Sidebar({ isOpen, onClose }) {
-  const { user, logout } = useAuth();
+  const { user, logout }    = useAuth();
+  const { dark, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
-  const handleLogout = () => { logout(); navigate('/login'); };
-
-  const handleNavClick = () => {
-    if (onClose) onClose();
-  };
+  const handleLogout   = () => { logout(); navigate('/login'); };
+  const handleNavClick = () => { if (onClose) onClose(); };
 
   return (
     <>
@@ -33,13 +32,7 @@ export default function Sidebar({ isOpen, onClose }) {
             </h1>
             <p>Control de Glucosa</p>
           </div>
-          <button
-            className="hamburger"
-            onClick={onClose}
-            style={{ display: 'none' }}
-            aria-label="Cerrar menú"
-            id="sidebar-close-btn"
-          >
+          <button className="hamburger" onClick={onClose} aria-label="Cerrar menú" id="sidebar-close-btn" style={{ display: 'none' }}>
             <X size={20} />
           </button>
         </div>
@@ -66,10 +59,16 @@ export default function Sidebar({ isOpen, onClose }) {
         </nav>
 
         <div className="sidebar-footer">
-          <button className="btn-logout" onClick={handleLogout}>
-            <LogOut size={16} />
-            Cerrar sesión
-          </button>
+          <div className="sidebar-footer-actions">
+            <button className="btn-theme" onClick={toggleTheme}>
+              {dark ? <Sun size={16} /> : <Moon size={16} />}
+              {dark ? 'Modo claro' : 'Modo oscuro'}
+            </button>
+            <button className="btn-logout" onClick={handleLogout}>
+              <LogOut size={16} />
+              Cerrar sesión
+            </button>
+          </div>
         </div>
       </aside>
     </>

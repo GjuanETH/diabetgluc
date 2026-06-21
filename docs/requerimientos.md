@@ -4,7 +4,7 @@
 | Campo | Detalle |
 |-------|---------|
 | Proyecto | Diabet Gluc — Control de Glucosa |
-| Versión | 1.0 |
+| Versión | 2.0 |
 | Fecha | Junio 2026 |
 | Tipo | Especificación de Requerimientos de Software (SRS) |
 
@@ -154,6 +154,84 @@ La aplicación permite a los usuarios registrar mediciones de glucosa, visualiza
 
 ---
 
+### RF-13 — Tiempo en Rango (TIR)
+**Descripción:** El sistema debe calcular y mostrar el porcentaje de lecturas en cada estado durante los últimos 30 días.  
+**Proceso:** Consultar registros de los últimos 30 días, calcular porcentaje de Normal/Bajo/Alto.  
+**Salida:** `{ normal: %, bajo: %, alto: %, total: N }` visualizado como barra de colores proporcional.  
+**Reglas de negocio:**
+- Se calcula solo sobre los últimos 30 días.
+- Si no hay registros en ese período, se indica ausencia de datos.
+- La barra TIR muestra colores: verde (Normal), rojo (Bajo), amarillo/ámbar (Alto).
+
+---
+
+### RF-14 — HbA1c estimada
+**Descripción:** El sistema debe estimar la HbA1c (hemoglobina glicosilada) a partir del promedio de glucosa en 90 días.  
+**Fórmula:** `HbA1c = (promedioGlucosa + 46.7) / 28.7`  
+**Salida:** Valor numérico con un decimal (ej. `6.8%`) e interpretación (En objetivo / Ligeramente elevada / Elevada).  
+**Reglas de negocio:**
+- Requiere mínimo 7 lecturas en los últimos 90 días para ser calculada.
+- Si no hay suficientes lecturas, se muestra un mensaje informativo.
+
+---
+
+### RF-15 — Período variable en gráfica
+**Descripción:** El Dashboard debe permitir al usuario seleccionar el período de la gráfica: 7, 14 o 30 días.  
+**Proceso:** El parámetro `?dias=` en el endpoint `/api/glucose/stats` filtra los datos de la gráfica.  
+**Reglas de negocio:**
+- El valor válido de `dias` está entre 7 y 90. Se fuerza con `Math.min(90, Math.max(7, dias))`.
+- El promedio semanal siempre se calcula sobre los últimos 7 días independientemente del período seleccionado.
+
+---
+
+### RF-16 — Filtros en el historial
+**Descripción:** El Historial debe permitir filtrar los registros por estado y por rango de fechas.  
+**Filtros disponibles:** Estado (Todos/Normal/Bajo/Alto), fecha desde, fecha hasta.  
+**Proceso:** Los filtros se envían como query params al endpoint GET `/api/glucose`.  
+**Reglas de negocio:**
+- Los filtros son opcionales y combinables.
+- Al limpiar los filtros, se restaura la vista completa paginada.
+- El contador de registros refleja los resultados filtrados.
+
+---
+
+### RF-17 — Exportación a PDF
+**Descripción:** El usuario puede exportar su historial de glucosa (con filtros aplicados) como un archivo PDF.  
+**Proceso:** El frontend solicita hasta 5000 registros con `?export=true`, luego genera el PDF en el cliente con jsPDF.  
+**Contenido del PDF:** Encabezado con nombre del paciente, rango objetivo y fecha de exportación; tabla con fecha, valor, estado y nota.  
+**Reglas de negocio:**
+- La exportación respeta los filtros activos (estado, desde, hasta).
+- La generación ocurre completamente en el cliente (no consume recursos del servidor).
+- El archivo se descarga automáticamente con nombre `historial-glucosa-YYYY-MM-DD.pdf`.
+
+---
+
+### RF-18 — Modo oscuro
+**Descripción:** La interfaz debe soportar un tema oscuro conmutable por el usuario.  
+**Proceso:** Un botón en la barra lateral aplica el atributo `data-theme="dark"` al elemento raíz. El tema se persiste en localStorage.  
+**Reglas de negocio:**
+- El tema se recuerda entre sesiones.
+- Todos los colores de la interfaz (fondos, textos, bordes, tarjetas) deben adaptarse al tema activo mediante variables CSS.
+
+---
+
+### RF-19 — Notificaciones toast
+**Descripción:** El sistema debe mostrar notificaciones no intrusivas (toasts) para confirmar o alertar sobre acciones del usuario.  
+**Tipos:** Éxito (verde), Error (rojo), Advertencia (ámbar).  
+**Comportamiento:** Los toasts aparecen en la esquina inferior derecha, se autodestruyen en 3.5 segundos y pueden cerrarse manualmente.  
+**Aplicaciones:** Guardar registro, eliminar registro, exportar PDF, actualizar perfil, crear/eliminar recordatorio.
+
+---
+
+### RF-20 — Progressive Web App (PWA)
+**Descripción:** La aplicación debe ser instalable como PWA en dispositivos móviles y de escritorio.  
+**Requerimientos técnicos:** Service worker con estrategia NetworkFirst, web manifest con nombre, colores e iconos.  
+**Reglas de negocio:**
+- El service worker se actualiza automáticamente en cada nuevo deploy.
+- El manifest incluye `display: standalone` para una experiencia de app nativa.
+
+---
+
 ## 3. Requerimientos No Funcionales
 
 ### RNF-01 — Seguridad
@@ -188,7 +266,7 @@ La aplicación permite a los usuarios registrar mediciones de glucosa, visualiza
 | RNF-03.1 | La interfaz debe ser responsive y funcionar correctamente en resoluciones desde 360px (móvil) hasta 1920px (escritorio). |
 | RNF-03.2 | Los mensajes de error deben ser claros, estar en español y orientar al usuario sobre cómo corregir el problema. |
 | RNF-03.3 | Las acciones destructivas (eliminar) deben requerir confirmación explícita del usuario. |
-| RNF-03.4 | El estado de carga debe ser visible (texto "Cargando..." o spinner) mientras se esperan respuestas del servidor. |
+| RNF-03.4 | El estado de carga debe ser visible (skeletons animados o texto "Cargando...") mientras se esperan respuestas del servidor. |
 | RNF-03.5 | Los badges de estado (Normal/Bajo/Alto) deben usar colores que cumplan con estándares básicos de accesibilidad (contraste mínimo 4.5:1). |
 | RNF-03.6 | La navegación entre secciones debe realizarse sin recargar la página completa. |
 
@@ -222,6 +300,7 @@ La aplicación permite a los usuarios registrar mediciones de glucosa, visualiza
 | RNF-06.1 | La aplicación debe funcionar en los navegadores modernos: Chrome 100+, Firefox 100+, Safari 15+, Edge 100+. |
 | RNF-06.2 | El backend debe funcionar en entornos Node.js 18 o superior. |
 | RNF-06.3 | No se deben usar dependencias que requieran instalación de software adicional en el cliente. |
+| RNF-06.4 | La aplicación debe ser instalable como PWA en Android (Chrome) e iOS (Safari) desde el navegador. |
 
 ---
 
@@ -259,7 +338,7 @@ La aplicación permite a los usuarios registrar mediciones de glucosa, visualiza
 | ID | Restricción |
 |----|------------|
 | R-01 | El sistema está diseñado para uso individual; no soporta múltiples usuarios gestionando la misma cuenta. |
-| R-02 | No se incluye módulo de notificaciones push; los recordatorios son solo visuales dentro de la app. |
+| R-02 | No se incluye módulo de notificaciones push del sistema operativo; los recordatorios son solo visuales dentro de la app. |
 | R-03 | La guía nutricional es contenido estático y no se personaliza según el perfil del usuario. |
 | R-04 | El sistema no se integra con dispositivos medidores de glucosa; los datos se ingresan manualmente. |
 | R-05 | En el plan gratuito de Render, el servidor tiene un límite de 750 horas de cómputo mensuales. |

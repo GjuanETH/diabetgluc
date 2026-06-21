@@ -4,7 +4,7 @@
 | Campo | Detalle |
 |-------|---------|
 | Proyecto | Diabet Gluc — Control de Glucosa |
-| Versión | 1.0 |
+| Versión | 2.0 |
 | Fecha | Junio 2026 |
 | Tipo de pruebas | Funcionales, de integración y de aceptación |
 
@@ -22,8 +22,12 @@ Verificar que la aplicación Diabet Gluc cumple con todos los requerimientos fun
 - Módulo de autenticación (registro, login, logout, rutas protegidas)
 - CRUD completo de registros de glucosa
 - Cálculo automático de estadísticas del Dashboard
-- Gráfica de evolución semanal
+- Gráfica de evolución semanal con selector de período (7/14/30 días)
 - Alertas automáticas de hipoglucemia e hiperglucemia
+- Tiempo en Rango (TIR) y HbA1c estimada
+- Filtros en historial por estado y fechas
+- Exportación de historial a PDF
+- Modo oscuro y toast notifications
 - Gestión de recordatorios
 - Actualización de perfil y reclasificación de registros
 - Validaciones de formularios en frontend y backend
@@ -363,7 +367,121 @@ Verificar que la aplicación Diabet Gluc cumple con todos los requerimientos fun
 
 ---
 
-### MÓDULO 6 — SEGURIDAD
+### MÓDULO 6 — MEJORAS v2.0
+
+#### CP-27 — TIR se calcula y muestra correctamente
+**Historia relacionada:** HU-20  
+**Precondición:** Usuario demo con registros en los últimos 30 días.  
+**Pasos:**
+1. Iniciar sesión
+2. Observar la tarjeta TIR en el Dashboard
+
+**Resultado esperado:** Se muestra una barra de colores con los porcentajes de Normal, Bajo y Alto. La suma de porcentajes es 100%.  
+**Estado:** ✅ Aprobado
+
+---
+
+#### CP-28 — HbA1c estimada se muestra cuando hay suficientes datos
+**Historia relacionada:** HU-21  
+**Precondición:** Usuario con al menos 7 registros en los últimos 90 días.  
+**Pasos:**
+1. Iniciar sesión y observar la tarjeta HbA1c en el Dashboard
+
+**Resultado esperado:** Se muestra un valor numérico con una interpretación (ej. "En objetivo").  
+**Estado:** ✅ Aprobado
+
+---
+
+#### CP-29 — Cambiar período de la gráfica
+**Historia relacionada:** HU-22  
+**Precondición:** Usuario con registros en los últimos 30 días.  
+**Pasos:**
+1. En el Dashboard, hacer clic en "14 días"
+2. Observar la gráfica
+3. Hacer clic en "30 días"
+
+**Resultado esperado:** La gráfica actualiza sus datos mostrando el período seleccionado.  
+**Estado:** ✅ Aprobado
+
+---
+
+#### CP-30 — Filtrar historial por estado
+**Historia relacionada:** HU-23  
+**Precondición:** Registros de los tres estados (Normal, Bajo, Alto) en el historial.  
+**Pasos:**
+1. Ir a Historial
+2. Abrir filtros y seleccionar estado = "Bajo"
+3. Hacer clic en "Aplicar"
+
+**Resultado esperado:** Solo se muestran registros con badge "Bajo".  
+**Estado:** ✅ Aprobado
+
+---
+
+#### CP-31 — Filtrar historial por rango de fechas
+**Historia relacionada:** HU-23  
+**Precondición:** Registros en fechas distintas.  
+**Pasos:**
+1. Abrir filtros en Historial
+2. Seleccionar fecha desde hace 7 días hasta hoy
+3. Aplicar filtros
+
+**Resultado esperado:** Solo se muestran registros dentro del rango de fechas especificado.  
+**Estado:** ✅ Aprobado
+
+---
+
+#### CP-32 — Exportar historial a PDF
+**Historia relacionada:** HU-24  
+**Precondición:** Usuario con al menos 1 registro.  
+**Pasos:**
+1. Ir a Historial
+2. Hacer clic en "PDF"
+
+**Resultado esperado:** Se descarga un archivo PDF con encabezado del paciente y tabla de registros.  
+**Estado:** ✅ Aprobado
+
+---
+
+#### CP-33 — Exportar PDF con filtros activos
+**Historia relacionada:** HU-24  
+**Precondición:** Usuario con registros de distintos estados.  
+**Pasos:**
+1. Filtrar historial por estado = "Alto"
+2. Hacer clic en "PDF"
+
+**Resultado esperado:** El PDF contiene solo los registros con estado Alto.  
+**Estado:** ✅ Aprobado
+
+---
+
+#### CP-34 — Activar y desactivar modo oscuro
+**Historia relacionada:** HU-25  
+**Precondición:** Usuario autenticado, tema claro activo.  
+**Pasos:**
+1. Hacer clic en "Modo oscuro" en el menú lateral
+2. Navegar entre páginas
+3. Recargar la página
+4. Hacer clic en "Modo claro"
+
+**Resultado esperado:** La interfaz cambia a tema oscuro. El tema persiste al recargar. Cambia de vuelta al hacer clic nuevamente.  
+**Estado:** ✅ Aprobado
+
+---
+
+#### CP-35 — Toast notification en acciones exitosas
+**Historia relacionada:** HU-24, HU-26  
+**Precondición:** Usuario autenticado.  
+**Pasos:**
+1. Guardar un nuevo registro de glucosa
+2. Observar esquina inferior derecha de la pantalla
+
+**Resultado esperado:** Aparece una notificación verde con el texto "Registro guardado correctamente". Desaparece automáticamente en 3.5 segundos.  
+**Estado:** ✅ Aprobado
+
+---
+
+### MÓDULO 7 — SEGURIDAD
 
 #### CP-25 — Acceso a datos de otro usuario
 **Historia relacionada:** HU-04  
@@ -418,6 +536,15 @@ Verificar que la aplicación Diabet Gluc cumple con todos los requerimientos fun
 | CP-24 | HU-19 | RF-10 | ✅ Aprobado |
 | CP-25 | HU-04 | RF-03 | ✅ Aprobado |
 | CP-26 | HU-04 | RF-03 | ✅ Aprobado |
+| CP-27 | HU-20 | RF-13 | ✅ Aprobado |
+| CP-28 | HU-21 | RF-14 | ✅ Aprobado |
+| CP-29 | HU-22 | RF-15 | ✅ Aprobado |
+| CP-30 | HU-23 | RF-16 | ✅ Aprobado |
+| CP-31 | HU-23 | RF-16 | ✅ Aprobado |
+| CP-32 | HU-24 | RF-17 | ✅ Aprobado |
+| CP-33 | HU-24 | RF-17 | ✅ Aprobado |
+| CP-34 | HU-25 | RF-18 | ✅ Aprobado |
+| CP-35 | HU-24 | RF-19 | ✅ Aprobado |
 
 ---
 
@@ -425,8 +552,8 @@ Verificar que la aplicación Diabet Gluc cumple con todos los requerimientos fun
 
 | Métrica | Valor |
 |---------|-------|
-| Total de casos de prueba | 26 |
-| Casos aprobados | 26 |
+| Total de casos de prueba | 35 |
+| Casos aprobados | 35 |
 | Casos fallidos | 0 |
-| Cobertura de historias de usuario | 19/19 (100%) |
-| Cobertura de requerimientos funcionales | 12/12 (100%) |
+| Cobertura de historias de usuario | 26/26 (100%) |
+| Cobertura de requerimientos funcionales | 20/20 (100%) |

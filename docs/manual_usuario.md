@@ -4,7 +4,7 @@
 | Campo | Detalle |
 |-------|---------|
 | Proyecto | Diabet Gluc — Control de Glucosa |
-| Versión | 1.0 |
+| Versión | 2.0 |
 | Fecha | Junio 2026 |
 | Dirigido a | Pacientes con diabetes y personas a cargo de su control glucémico |
 
@@ -12,7 +12,7 @@
 
 ## ¿Qué es Diabet Gluc?
 
-Diabet Gluc es una aplicación web gratuita para llevar el control de tu glucosa en sangre. Puedes usarla desde cualquier navegador (Chrome, Firefox, Safari, Edge) en computador, tablet o celular, sin necesidad de instalar nada.
+Diabet Gluc es una aplicación web gratuita para llevar el control de tu glucosa en sangre. Puedes usarla desde cualquier navegador (Chrome, Firefox, Safari, Edge) en computador, tablet o celular. También puedes **instalarla como aplicación** en tu dispositivo (ver sección "Instalar la app en tu celular").
 
 **Acceso:** https://diabetgluc.vercel.app
 
@@ -86,10 +86,23 @@ Si tu última medición está fuera de tu rango objetivo, verás una alerta en l
 - **Banner rojo:** nivel BAJO (hipoglucemia) — actúa rápidamente, consume algo con azúcar.
 - **Banner amarillo:** nivel ALTO (hiperglucemia) — consulta con tu médico si persiste.
 
-### Gráfica de la última semana
-Muestra una línea con la evolución de tus niveles de glucosa durante los últimos 7 días. Las líneas punteadas indican tu rango objetivo (mínimo y máximo).
+### HbA1c estimada
+La tarjeta de **HbA1c** muestra una estimación de tu hemoglobina glicosilada basada en tus lecturas de los últimos 90 días. Este valor te da una idea de tu control de glucosa a largo plazo. Necesitas al menos 7 mediciones en 90 días para que aparezca.
 
-Si no tienes registros esta semana, verás el mensaje "No hay registros esta semana" con un botón para agregar uno.
+> ℹ️ Esta es una estimación matemática, no un resultado de laboratorio. Consúltala con tu médico.
+
+### Tiempo en Rango (TIR)
+La tarjeta de **TIR** muestra qué porcentaje de tus mediciones de los últimos 30 días estuvieron en cada estado:
+- **Verde:** porcentaje de tiempo en rango Normal
+- **Rojo:** porcentaje de tiempo con valores Bajos
+- **Amarillo:** porcentaje de tiempo con valores Altos
+
+La meta generalmente recomendada es tener más del 70% del tiempo en rango Normal.
+
+### Gráfica de evolución
+Muestra una línea con la evolución de tus niveles de glucosa. Puedes cambiar el período con los botones **"7 días"**, **"14 días"** o **"30 días"**. Las líneas punteadas indican tu rango objetivo.
+
+Si no tienes registros en el período seleccionado, verás un mensaje con un botón para agregar uno.
 
 ### Accesos rápidos
 Cuatro botones de colores que te llevan directamente a Historial, Recordatorios, Nutrición y Perfil.
@@ -98,7 +111,7 @@ Cuatro botones de colores que te llevan directamente a Historial, Recordatorios,
 
 ## Historial de Glucosa
 
-Esta sección muestra todos tus registros en una tabla organizada del más reciente al más antiguo.
+Esta sección muestra todos tus registros en una tabla organizada del más reciente al más antiguo. Puedes filtrar los registros y exportarlos como PDF.
 
 ### ¿Qué significa cada columna?
 
@@ -119,7 +132,20 @@ Esta sección muestra todos tus registros en una tabla organizada del más recie
    - **Nota (opcional):** por ejemplo "Antes del desayuno", "Post ejercicio"
 3. Haz clic en **"Guardar"**
 
-El sistema clasifica automáticamente el registro según tu rango objetivo configurado en el Perfil.
+El sistema clasifica automáticamente el registro según tu rango objetivo configurado en el Perfil. Verás una notificación verde en la esquina inferior de la pantalla confirmando que el registro fue guardado.
+
+### Filtrar registros
+
+Haz clic en **"Filtros"** para abrir el panel de filtros. Puedes combinar:
+- **Estado:** Todos, Normal, Bajo o Alto
+- **Desde:** fecha de inicio del período
+- **Hasta:** fecha de fin del período
+
+Haz clic en **"Aplicar"** para ver los resultados. Usa **"Limpiar"** para volver a ver todos los registros.
+
+### Exportar a PDF
+
+Haz clic en el botón **"PDF"** para descargar tus registros (con los filtros activos si los hay) como un archivo PDF. El archivo incluye tu nombre, rango objetivo, fecha de exportación y una tabla completa.
 
 ### Editar un registro
 
@@ -219,13 +245,41 @@ Los rangos objetivo son los valores entre los cuales tu glucosa debe estar. Esto
 
 ---
 
+## Modo oscuro
+
+En la parte inferior del menú lateral encontrarás el botón **"Modo oscuro"** (con ícono de luna). Haz clic para cambiar la interfaz a colores oscuros, más cómodos para usar en condiciones de poca luz. Haz clic de nuevo para volver al modo claro.
+
+Tu preferencia se guarda automáticamente y se aplica la próxima vez que entres a la app.
+
+---
+
+## Instalar la app en tu celular
+
+Diabet Gluc es una **aplicación instalable (PWA)**. Puedes agregarla a la pantalla de inicio de tu celular para acceder más rápido:
+
+**En Android (Chrome):**
+1. Entra a https://diabetgluc.vercel.app
+2. Toca el menú de Chrome (los tres puntos arriba a la derecha)
+3. Selecciona **"Añadir a pantalla de inicio"**
+4. Confirma con **"Añadir"**
+
+**En iPhone/iPad (Safari):**
+1. Entra a https://diabetgluc.vercel.app en Safari
+2. Toca el botón de compartir (el cuadrado con la flecha hacia arriba)
+3. Selecciona **"Añadir a pantalla de inicio"**
+4. Toca **"Añadir"**
+
+La app aparecerá con el ícono de Diabet Gluc y se abrirá sin la barra del navegador, como una app nativa.
+
+---
+
 ## Preguntas frecuentes
 
 **¿Mis datos están seguros?**  
 Sí. La aplicación usa conexiones cifradas (HTTPS), las contraseñas se guardan con cifrado seguro (bcrypt) y solo tú puedes ver tus datos. Ningún otro usuario puede acceder a tu información.
 
 **¿Puedo usar la app en el celular?**  
-Sí. La interfaz se adapta automáticamente a pantallas pequeñas. Se recomienda usar el navegador Chrome en Android o Safari en iPhone.
+Sí. La interfaz se adapta automáticamente a pantallas pequeñas. Además, puedes instalarla como app desde Chrome (Android) o Safari (iPhone). Ver la sección "Instalar la app en tu celular".
 
 **¿La app envía notificaciones al celular?**  
 No. Los recordatorios son visuales dentro de la aplicación. Para recibir notificaciones externas, deberías dejar la app abierta en el navegador.

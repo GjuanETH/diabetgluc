@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
+import { ToastProvider } from './context/ToastContext';
 import PrivateRoute from './components/PrivateRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -13,21 +15,25 @@ import Perfil from './pages/Perfil';
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login"           element={<Login />} />
-          <Route path="/register"        element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password"  element={<ResetPassword />} />
-          <Route path="/dashboard"       element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-          <Route path="/historial"       element={<PrivateRoute><Historial /></PrivateRoute>} />
-          <Route path="/recordatorios"   element={<PrivateRoute><Recordatorios /></PrivateRoute>} />
-          <Route path="/nutricion"       element={<PrivateRoute><Nutricion /></PrivateRoute>} />
-          <Route path="/perfil"          element={<PrivateRoute><Perfil /></PrivateRoute>} />
-          <Route path="*"                element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+    <ThemeProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login"           element={<Login />} />
+              <Route path="/register"        element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password"  element={<ResetPassword />} />
+              <Route path="/dashboard"       element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+              <Route path="/historial"       element={<PrivateRoute><Historial /></PrivateRoute>} />
+              <Route path="/recordatorios"   element={<PrivateRoute><Recordatorios /></PrivateRoute>} />
+              <Route path="/nutricion"       element={<PrivateRoute><Nutricion /></PrivateRoute>} />
+              <Route path="/perfil"          element={<PrivateRoute><Perfil /></PrivateRoute>} />
+              <Route path="*"               element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </ToastProvider>
+    </ThemeProvider>
   );
 }
