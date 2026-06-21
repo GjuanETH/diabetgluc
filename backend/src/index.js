@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const helmet = require('helmet');
 
 const authRoutes = require('./routes/auth');
 const glucoseRoutes = require('./routes/glucose');
@@ -14,6 +15,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
+app.use(helmet());
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 

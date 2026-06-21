@@ -68,6 +68,11 @@ export default function Login() {
         </form>
 
         <div className="auth-link">
+          <Link to="/forgot-password" style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </div>
+        <div className="auth-link">
           ¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link>
         </div>
       </div>

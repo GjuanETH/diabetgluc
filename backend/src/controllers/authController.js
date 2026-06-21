@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
@@ -46,4 +47,66 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'El email es requerido' });
+
+    const user = await User.findOne({ email });
+
+    // Respuesta genérica por seguridad
+    if (!user) {
+      return res.json({ message: 'Si el correo está registrado, recibirás un enlace de recuperación.' });
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hora
+    await user.save({ validateBeforeSave: false });
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
+
+    // En producción, aquí se enviaría el email con resetUrl
+    console.log(`[RESET] Enlace para ${email}: ${resetUrl}`);
+
+    res.json({
+      message: 'Si el correo está registrado, recibirás un enlace de recuperación.',
+      // Solo en demo — en producción eliminar esta línea y enviar por email
+      resetUrl,
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Error al procesar la solicitud', error: err.message });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password)
+      return res.status(400).json({ message: 'Token y contraseña son requeridos' });
+
+    if (password.length < 8)
+      return res.status(400).json({ message: 'La contraseña debe tener al menos 8 caracteres' });
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user)
+      return res.status(400).json({ message: 'El enlace es inválido o ha expirado' });
+
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.json({ message: 'Contraseña actualizada correctamente. Ya puedes iniciar sesión.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error al restablecer la contraseña', error: err.message });
+  }
+};
+
+module.exports = { register, login, forgotPassword, resetPassword };

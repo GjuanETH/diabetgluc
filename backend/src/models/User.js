@@ -9,6 +9,8 @@ const userSchema = new mongoose.Schema(
     tipoDiabetes: { type: String, enum: ['Tipo 1', 'Tipo 2', 'Otro'], default: 'Tipo 2' },
     rangoObjetivoMin: { type: Number, default: 70 },
     rangoObjetivoMax: { type: Number, default: 180 },
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date },
   },
   { timestamps: true }
 );

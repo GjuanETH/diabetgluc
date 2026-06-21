@@ -8,8 +8,22 @@ const calcularEstado = (valor, min, max) => {
 
 const getRecords = async (req, res) => {
   try {
-    const records = await GlucoseRecord.find({ userId: req.user._id }).sort({ fecha: -1 });
-    res.json(records);
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, parseInt(req.query.limit) || 20);
+    const skip = (page - 1) * limit;
+
+    const [records, total] = await Promise.all([
+      GlucoseRecord.find({ userId: req.user._id }).sort({ fecha: -1 }).skip(skip).limit(limit),
+      GlucoseRecord.countDocuments({ userId: req.user._id }),
+    ]);
+
+    res.json({
+      records,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+      limit,
+    });
   } catch (err) {
     res.status(500).json({ message: 'Error al obtener registros', error: err.message });
   }
@@ -21,7 +35,6 @@ const getStats = async (req, res) => {
     const { rangoObjetivoMin, rangoObjetivoMax } = req.user;
 
     const total = await GlucoseRecord.countDocuments({ userId });
-
     const ultima = await GlucoseRecord.findOne({ userId }).sort({ fecha: -1 });
 
     const hace7dias = new Date();
@@ -43,12 +56,7 @@ const getStats = async (req, res) => {
       estado: calcularEstado(r.valor, rangoObjetivoMin, rangoObjetivoMax),
     }));
 
-    res.json({
-      total,
-      ultimaMedicion: ultima || null,
-      promedioSemanal,
-      grafica,
-    });
+    res.json({ total, ultimaMedicion: ultima || null, promedioSemanal, grafica });
   } catch (err) {
     res.status(500).json({ message: 'Error al obtener estadísticas', error: err.message });
   }
@@ -66,7 +74,6 @@ const createRecord = async (req, res) => {
       return res.status(400).json({ message: 'El valor de glucosa debe estar entre 1 y 600 mg/dL' });
 
     const estado = calcularEstado(Number(valor), rangoObjetivoMin, rangoObjetivoMax);
-
     const record = await GlucoseRecord.create({
       userId: req.user._id,
       valor: Number(valor),
