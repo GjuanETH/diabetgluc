@@ -90,7 +90,12 @@ export default function Login() {
               />
             </div>
             <div className="form-group">
-              <label className="form-label">Contraseña</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 7 }}>
+                <label className="form-label" style={{ margin: 0 }}>Contraseña</label>
+                <Link to="/forgot-password" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
               <input
                 className="form-input"
                 type="password"
@@ -101,7 +106,6 @@ export default function Login() {
                 autoComplete="current-password"
                 required
               />
-              <Link to="/forgot-password" className="auth-forgot">¿Olvidaste tu contraseña?</Link>
             </div>
 
             <button className="auth-submit" type="submit" disabled={loading}>
